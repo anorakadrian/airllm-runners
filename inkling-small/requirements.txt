@@ -1,0 +1,8 @@
+airllm
+bitsandbytes
+torch
+transformers
+accelerate
+huggingface_hub
+turbovec
+numpy
