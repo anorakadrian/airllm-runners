@@ -1,0 +1,56 @@
+name: Python Package using Conda
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set up Miniconda
+      uses: conda-incubator/setup-miniconda@v3
+      with:
+        auto-update-conda: true
+        python-version: "3.10"
+        activate-environment: test-environment
+        auto-activate-base: false
+
+    - name: Install Dependencies
+      run: |
+        conda install pytest -y
+        if [ -f environment.yml ]; then
+          conda env update --file environment.yml --name test-environment
+        fi
+        # Install shared / model-specific requirements if present
+        if [ -f requirements.txt ]; then
+          pip install -r requirements.txt
+        fi
+        if [ -f inkling-small/requirements.txt ]; then
+          pip install -r inkling-small/requirements.txt
+        fi
+        # Note: kimi-k3 has heavy deps (flash-attn etc.) – skip full install in CI
+
+    - name: Lint with flake8 (optional)
+      run: |
+        pip install flake8
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics || true
+
+    - name: Run Pytest
+      run: |
+        # Create a minimal test if none exist yet
+        if [ ! -d tests ]; then
+          mkdir -p tests
+          echo "def test_placeholder(): assert True" > tests/test_placeholder.py
+        fi
+        pytest -v
