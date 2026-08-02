@@ -1,0 +1,9 @@
+airllm
+compressed-tensors
+flash-attn
+torch
+transformers==4.56.*
+accelerate
+huggingface_hub
+bitsandbytes
+numpy
